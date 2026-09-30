@@ -21,6 +21,99 @@ describe("dev sign-in passphrase", () => {
   });
 });
 
+describe("invite links", () => {
+  let app: ReturnType<typeof createApp>;
+  const req = (method: string, path: string, opts: { token?: string; ip?: string; body?: unknown } = {}) =>
+    app.request(path, {
+      method,
+      headers: {
+        ...(opts.token ? { Authorization: `Bearer ${opts.token}` } : {}),
+        ...(opts.ip ? { "X-Forwarded-For": opts.ip } : {}),
+        ...(opts.body === undefined ? {} : { "Content-Type": "application/json" }),
+      },
+      body: opts.body === undefined ? undefined : JSON.stringify(opts.body),
+    });
+  const signIn = async (name: string) => {
+    const res = await req("POST", "/auth", { body: { provider: "dev", token: name } });
+    return (await res.json()) as { token: string; user: { id: string; name: string } };
+  };
+
+  before(() => {
+    app = createApp({
+      db: openDb(":memory:"),
+      imagesDir: "unused",
+      sessionSecret: "test-secret",
+      verifiers: { dev: devVerifier() },
+      pusher: { notifyDoodle: async () => {} },
+      web: { bundleId: "app.doodle.ios", appleTeamId: "TEAM123456" },
+    });
+  });
+
+  it("serves a public invite page that names the inviter and escapes it", async () => {
+    const clara = await signIn(`Clara <b>"x"</b>`);
+    const { code } = (await (await req("POST", "/invites", { token: clara.token })).json()) as { code: string };
+
+    const page = await req("GET", `/i/${code.toLowerCase()}`, { ip: "1.1.1.1" });
+    assert.equal(page.status, 200);
+    const html = await page.text();
+    assert.match(html, /invited you to Doodle/);
+    assert.match(html, new RegExp(`doodle://invite/${code}`));
+    assert.ok(!html.includes("Clara <b>"), "inviter name must be HTML-escaped");
+    assert.ok(html.includes("Clara &lt;b&gt;&quot;x&quot;&lt;/b&gt;"));
+
+    const missing = await req("GET", "/i/ZZZZZZ");
+    assert.equal(missing.status, 404);
+    assert.match(await missing.text(), /no longer valid/);
+  });
+
+  it("tells the signed-in user who invited them, and why not when it can't work", async () => {
+    const dias = await signIn("Dias");
+    const aruzhan = await signIn("Aruzhan");
+    const { code } = (await (await req("POST", "/invites", { token: dias.token })).json()) as { code: string };
+
+    assert.deepEqual(await (await req("GET", `/invites/${code}`, { token: aruzhan.token })).json(), {
+      inviter: dias.user,
+    });
+    assert.equal((await req("GET", `/invites/${code}`, { token: dias.token })).status, 400); // own
+    assert.equal((await req("GET", "/invites/NOPE22", { token: aruzhan.token })).status, 404);
+    assert.equal((await req("GET", `/invites/${code}`)).status, 401);
+  });
+
+  it("matches a fresh install to the link that device just opened, once", async () => {
+    const maya = await signIn("Maya");
+    const ben = await signIn("Ben");
+    const { code } = (await (await req("POST", "/invites", { token: maya.token })).json()) as { code: string };
+
+    await req("GET", `/i/${code}`, { ip: "9.9.9.9" });
+
+    // A different network sees nothing.
+    assert.equal((await req("POST", "/invites/claim", { token: ben.token, ip: "8.8.8.8" })).status, 404);
+
+    const claimed = await req("POST", "/invites/claim", { token: ben.token, ip: "9.9.9.9" });
+    assert.equal(claimed.status, 200);
+    assert.deepEqual(await claimed.json(), { code, inviter: maya.user });
+
+    // Single use: declining must not cause a re-prompt.
+    assert.equal((await req("POST", "/invites/claim", { token: ben.token, ip: "9.9.9.9" })).status, 404);
+  });
+
+  it("ignores links whose inviter got paired in the meantime", async () => {
+    const [a, b, c] = await Promise.all([signIn("A1"), signIn("B1"), signIn("C1")]);
+    const { code } = (await (await req("POST", "/invites", { token: a.token })).json()) as { code: string };
+    await req("GET", `/i/${code}`, { ip: "7.7.7.7" });
+    assert.equal((await req("POST", "/pair", { token: b.token, body: { code } })).status, 200);
+    assert.equal((await req("POST", "/invites/claim", { token: c.token, ip: "7.7.7.7" })).status, 404);
+  });
+
+  it("publishes the universal-link file only when a team id is configured", async () => {
+    const res = await req("GET", "/.well-known/apple-app-site-association");
+    assert.equal(res.status, 200);
+    assert.deepEqual(await res.json(), {
+      applinks: { details: [{ appIDs: ["TEAM123456.app.doodle.ios"], components: [{ "/": "/i/*" }] }] },
+    });
+  });
+});
+
 describe("doodle api", () => {
   let dir: string;
   let app: ReturnType<typeof createApp>;

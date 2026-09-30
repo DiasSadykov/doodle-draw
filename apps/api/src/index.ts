@@ -31,6 +31,11 @@ const app = createApp({
   sessionSecret,
   verifiers,
   pusher: logPusher,
+  web: {
+    bundleId: process.env.BUNDLE_ID ?? "app.doodle.ios",
+    appleTeamId: process.env.APPLE_TEAM_ID || undefined,
+    appStoreUrl: process.env.APP_STORE_URL || undefined,
+  },
 });
 
 serve({ fetch: app.fetch, port }, (info) => {

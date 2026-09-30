@@ -3,6 +3,12 @@ import PencilKit
 import SwiftUI
 import UIKit
 
+struct PendingInvite: Identifiable, Equatable {
+    let code: String
+    let inviter: APIUser
+    var id: String { code }
+}
+
 @MainActor
 final class AppState: ObservableObject {
     enum Route: Hashable {
@@ -31,6 +37,9 @@ final class AppState: ObservableObject {
     @Published var tool: CanvasTool = .pen
     @Published var backgroundPhoto: UIImage?
 
+    /// "Clara invited you": set when a link was opened, or found for a fresh install.
+    @Published var pendingInvite: PendingInvite?
+
     @Published var isSending = false
     @Published var isBusy = false
     @Published var launchError: String?
@@ -39,6 +48,61 @@ final class AppState: ObservableObject {
     var partnerName: String { partner?.name ?? "your person" }
 
     private var imageCache: [String: UIImage] = [:]
+
+    // An invite link can be opened before sign-in, so the code waits here until we can use it.
+    private static let storedCodeKey = "pendingInviteCode"
+    private static let triedClaimKey = "triedInviteClaim"
+    private var storedInviteCode: String? {
+        get { UserDefaults.standard.string(forKey: Self.storedCodeKey) }
+        set { UserDefaults.standard.set(newValue, forKey: Self.storedCodeKey) }
+    }
+    private var triedClaim: Bool {
+        get { UserDefaults.standard.bool(forKey: Self.triedClaimKey) }
+        set { UserDefaults.standard.set(newValue, forKey: Self.triedClaimKey) }
+    }
+
+    // MARK: - Invite links
+
+    func handle(url: URL) async {
+        guard let code = DoodleAPI.inviteCode(from: url) else { return }
+        if partner != nil { return } // already paired: nothing to accept
+        storedInviteCode = code
+        await resolvePendingInvite()
+    }
+
+    /// Turns a stored link (or, on a fresh install, a link this device just opened) into a prompt.
+    func resolvePendingInvite() async {
+        guard route == .pair, pendingInvite == nil else { return }
+
+        if let code = storedInviteCode {
+            storedInviteCode = nil
+            triedClaim = true
+            do {
+                pendingInvite = PendingInvite(code: code, inviter: try await DoodleAPI.inviter(code: code))
+            } catch let error as APIError where ["own_invite", "already_paired"].contains(error.code) {
+                // Nothing to ask the user.
+            } catch {
+                alertMessage = error.localizedDescription
+            }
+            return
+        }
+
+        if !triedClaim {
+            triedClaim = true
+            if let found = try? await DoodleAPI.claimInvite() {
+                pendingInvite = PendingInvite(code: found.code, inviter: found.inviter)
+            }
+        }
+    }
+
+    func accept(_ invite: PendingInvite) async {
+        pendingInvite = nil
+        await join(code: invite.code)
+    }
+
+    func declineInvite() {
+        pendingInvite = nil
+    }
 
     // MARK: - Launch + sign-in
 
@@ -80,12 +144,15 @@ final class AppState: ObservableObject {
         me = response.user
         partner = response.partner
         route = response.partner == nil ? .pair : .canvas
+        if response.partner != nil { storedInviteCode = nil }
+        if route == .pair { Task { await resolvePendingInvite() } }
     }
 
     private func resetSessionState() {
         me = nil
         partner = nil
         inviteCode = nil
+        pendingInvite = nil
         history = []
         latestFromPartner = nil
         imageCache = [:]

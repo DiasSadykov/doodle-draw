@@ -6,7 +6,8 @@ struct PairView: View {
     @State private var enteredCode = ""
 
     private var shareMessage: String {
-        "Let's share doodles on our Home Screens. Open Doodle and enter my code: \(appState.inviteCode ?? "")"
+        let code = appState.inviteCode ?? ""
+        return "Let's share doodles on our Home Screens: \(DoodleAPI.inviteLink(code: code).absoluteString)"
     }
 
     var body: some View {
@@ -40,7 +41,7 @@ struct PairView: View {
                         ProgressView().frame(height: 48)
                     }
                 }
-                Text("Expires in 24 hours. This screen continues by itself once they join.")
+                Text("Expires in 7 days. This screen continues by itself once they join.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
@@ -84,6 +85,21 @@ struct PairView: View {
         .task {
             await appState.refreshInvite()
             await appState.watchForPartner()
+        }
+        .alert(
+            "\(appState.pendingInvite?.inviter.name ?? "Someone") invited you",
+            isPresented: Binding(
+                get: { appState.pendingInvite != nil },
+                set: { if !$0 { appState.declineInvite() } }
+            )
+        ) {
+            Button("Accept") {
+                // Capture now: dismissing the alert clears `pendingInvite` right after this closure.
+                if let invite = appState.pendingInvite { Task { await appState.accept(invite) } }
+            }
+            Button("Not now", role: .cancel) { appState.declineInvite() }
+        } message: {
+            Text("Pair up to share doodles on each other's Home Screen.")
         }
         .alert("Enter invite code", isPresented: $showEnterCode) {
             TextField("Code", text: $enteredCode)

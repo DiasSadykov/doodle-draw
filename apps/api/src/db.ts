@@ -18,6 +18,15 @@ CREATE TABLE IF NOT EXISTS invites (
   expires_at TEXT NOT NULL
 );
 
+-- Short-lived record of who opened which invite link, so a freshly installed app
+-- can find the invite that brought it there. Only a salted hash of the IP is kept.
+CREATE TABLE IF NOT EXISTS invite_visits (
+  ip_hash    TEXT NOT NULL,
+  code       TEXT NOT NULL,
+  created_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS invite_visits_ip ON invite_visits (ip_hash, created_at DESC);
+
 CREATE TABLE IF NOT EXISTS pairs (
   id         TEXT PRIMARY KEY,
   user_a     TEXT NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,

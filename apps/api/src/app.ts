@@ -1,12 +1,13 @@
 import { Hono, type Context } from "hono";
 import { bodyLimit } from "hono/body-limit";
-import { randomInt, randomUUID } from "node:crypto";
+import { createHmac, randomInt, randomUUID } from "node:crypto";
 import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import type { DatabaseSync } from "node:sqlite";
 import type { Verifier } from "./providers.js";
 import type { Pusher } from "./push.js";
 import { signSession, verifySession } from "./session.js";
+import { appSiteAssociation, invitePage, type WebConfig } from "./web.js";
 
 export type Deps = {
   db: DatabaseSync;
@@ -15,13 +16,16 @@ export type Deps = {
   /** Keyed by provider name: "google", "dev", later "apple". */
   verifiers: Record<string, Verifier>;
   pusher: Pusher;
+  /** Invite link page + universal links. Defaults are fine for tests. */
+  web?: WebConfig;
 };
 
 type UserRow = { id: string; name: string };
 type PairRow = { id: string; user_a: string; user_b: string };
 type DoodleRow = { id: string; sender_id: string; has_photo: number; created_at: string };
 
-const INVITE_TTL_MS = 24 * 60 * 60 * 1000;
+const INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+const VISIT_TTL_MS = 60 * 60 * 1000; // how long an opened link can be matched to a new install
 const INVITE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // no 0/O/1/I
 const MAX_IMAGE_BYTES = 2 * 1024 * 1024;
 
@@ -34,7 +38,16 @@ class ApiError extends Error {
   }
 }
 
-export function createApp({ db, imagesDir, sessionSecret, verifiers, pusher }: Deps) {
+const normalizeCode = (raw: string) => raw.trim().toUpperCase();
+
+export function createApp({
+  db,
+  imagesDir,
+  sessionSecret,
+  verifiers,
+  pusher,
+  web = { bundleId: "app.doodle.ios" },
+}: Deps) {
   const app = new Hono<{ Variables: { userId: string } }>();
 
   // ---- tiny SQL helpers -------------------------------------------------
@@ -84,8 +97,13 @@ export function createApp({ db, imagesDir, sessionSecret, verifiers, pusher }: D
     return c.json({ error: "internal" }, 500);
   });
 
+  // Public: sign-in, and the web side of invite links.
+  const isPublic = (method: string, path: string) =>
+    (method === "POST" && path === "/auth") ||
+    (method === "GET" && (path.startsWith("/i/") || path === "/.well-known/apple-app-site-association"));
+
   app.use("*", async (c, next) => {
-    if (c.req.method === "POST" && c.req.path === "/auth") return next();
+    if (isPublic(c.req.method, c.req.path)) return next();
     const header = c.req.header("Authorization") ?? "";
     const token = header.startsWith("Bearer ") ? header.slice(7) : "";
     const userId = token ? await verifySession(token, sessionSecret) : null;
@@ -94,6 +112,38 @@ export function createApp({ db, imagesDir, sessionSecret, verifiers, pusher }: D
     }
     c.set("userId", userId);
     await next();
+  });
+
+  // ---- invite links (public web) ---------------------------------------
+  // Caddy is the only way in (the api port is not published), so X-Forwarded-For is the real client.
+  const ipHash = (c: Context) => {
+    const ip = c.req.header("x-forwarded-for")?.split(",")[0]?.trim();
+    return ip ? createHmac("sha256", sessionSecret).update(ip).digest("hex") : null;
+  };
+
+  app.get("/i/:code", (c) => {
+    const code = normalizeCode(c.req.param("code"));
+    const invite = get<{ user_id: string; expires_at: string }>(
+      "SELECT user_id, expires_at FROM invites WHERE code = ?",
+      code,
+    );
+    const inviter =
+      invite && invite.expires_at >= new Date().toISOString()
+        ? get<UserRow>("SELECT id, name FROM users WHERE id = ?", invite.user_id)
+        : undefined;
+
+    const hash = ipHash(c);
+    if (inviter && hash) {
+      run("INSERT INTO invite_visits (ip_hash, code, created_at) VALUES (?, ?, ?)", hash, code, new Date().toISOString());
+    }
+    return c.html(invitePage({ code, inviter: inviter?.name ?? null, config: web }), inviter ? 200 : 404, {
+      "Cache-Control": "no-store",
+    });
+  });
+
+  app.get("/.well-known/apple-app-site-association", (c) => {
+    if (!web.appleTeamId) return c.body(null, 404);
+    return c.json(appSiteAssociation(web));
   });
 
   // ---- auth -------------------------------------------------------------
@@ -154,6 +204,49 @@ export function createApp({ db, imagesDir, sessionSecret, verifiers, pusher }: D
       throw new Error("could not generate a unique invite code");
     });
     return c.json({ code, expiresAt }, 201);
+  });
+
+  /** Who is behind this invite, or why it can't be used by `me`. */
+  const inviterFor = (rawCode: string, me: string): UserRow => {
+    const code = normalizeCode(rawCode);
+    const invite = get<{ user_id: string; expires_at: string }>(
+      "SELECT user_id, expires_at FROM invites WHERE code = ?",
+      code,
+    );
+    if (!invite) throw new ApiError(404, "invite_not_found");
+    if (invite.expires_at < new Date().toISOString()) throw new ApiError(410, "invite_expired");
+    if (invite.user_id === me) throw new ApiError(400, "own_invite");
+    if (pairOf(me)) throw new ApiError(409, "already_paired");
+    const inviter = get<UserRow>("SELECT id, name FROM users WHERE id = ?", invite.user_id);
+    if (!inviter || pairOf(inviter.id)) throw new ApiError(404, "invite_not_found");
+    return inviter;
+  };
+
+  // Lets the app say "Dias invited you" before the user accepts.
+  app.get("/invites/:code", (c) => c.json({ inviter: inviterFor(c.req.param("code"), c.get("userId")) }));
+
+  // A new install asks: did this device just open an invite link? Matched by IP within an hour.
+  // Answers at most once per link visit, so declining doesn't cause a re-prompt.
+  app.post("/invites/claim", (c) => {
+    const me = c.get("userId");
+    const hash = ipHash(c);
+    if (!hash) throw new ApiError(404, "invite_not_found");
+
+    run("DELETE FROM invite_visits WHERE created_at < ?", new Date(Date.now() - VISIT_TTL_MS).toISOString());
+    const visits = all<{ code: string }>(
+      "SELECT code FROM invite_visits WHERE ip_hash = ? ORDER BY created_at DESC",
+      hash,
+    );
+    run("DELETE FROM invite_visits WHERE ip_hash = ?", hash);
+
+    for (const { code } of visits) {
+      try {
+        return c.json({ code, inviter: inviterFor(code, me) });
+      } catch (e) {
+        if (!(e instanceof ApiError)) throw e;
+      }
+    }
+    throw new ApiError(404, "invite_not_found");
   });
 
   app.post("/pair", async (c) => {

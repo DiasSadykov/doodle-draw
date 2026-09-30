@@ -65,6 +65,27 @@ enum DoodleSession {
 enum DoodleAPI {
     static let baseURL = URL(string: "https://157-180-74-100.sslip.io")!
 
+    /// The link people share: opens the app if installed, otherwise explains what Doodle is.
+    static func inviteLink(code: String) -> URL {
+        baseURL.appendingPathComponent("i").appendingPathComponent(code)
+    }
+
+    /// Pulls an invite code out of `doodle://invite/CODE` or `https://<host>/i/CODE`.
+    static func inviteCode(from url: URL) -> String? {
+        let parts: [String]
+        if url.scheme == "doodle", url.host == "invite" {
+            parts = url.pathComponents.filter { $0 != "/" }
+        } else if url.host == baseURL.host {
+            let path = url.pathComponents.filter { $0 != "/" }
+            guard path.first == "i" else { return nil }
+            parts = Array(path.dropFirst())
+        } else {
+            return nil
+        }
+        guard let code = parts.first, !code.isEmpty else { return nil }
+        return code.uppercased()
+    }
+
     private static let urlSession: URLSession = {
         let config = URLSessionConfiguration.default
         config.timeoutIntervalForRequest = 15
@@ -106,6 +127,20 @@ enum DoodleAPI {
 
     static func createInvite() async throws -> APIInvite {
         try decode(APIInvite.self, try await perform("POST", "/invites"))
+    }
+
+    /// Who is behind this invite code? (Shown before the user accepts.)
+    static func inviter(code: String) async throws -> APIUser {
+        struct Response: Decodable { let inviter: APIUser }
+        let escaped = code.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? code
+        return try decode(Response.self, try await perform("GET", "/invites/\(escaped)")).inviter
+    }
+
+    /// Did this device just open an invite link before installing? Answers at most once.
+    static func claimInvite() async throws -> (code: String, inviter: APIUser) {
+        struct Response: Decodable { let code: String; let inviter: APIUser }
+        let response = try decode(Response.self, try await perform("POST", "/invites/claim"))
+        return (response.code, response.inviter)
     }
 
     static func pair(code: String) async throws -> APIUser {

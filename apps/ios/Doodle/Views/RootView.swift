@@ -23,6 +23,7 @@ struct RootView: View {
         }
         .animation(.easeInOut(duration: 0.25), value: appState.route)
         .task { await appState.bootstrap() }
+        .onOpenURL { url in Task { await appState.handle(url: url) } }
         // Fresh doodles whenever we land on a screen that shows them, and when returning to the app.
         .task(id: appState.route) { await appState.refresh() }
         .onChange(of: scenePhase) { _, phase in
