@@ -315,6 +315,12 @@ export function createApp({
     return c.body(null, 204);
   });
 
+  // Signing out: stop pushing to this phone.
+  app.delete("/device", (c) => {
+    run("DELETE FROM devices WHERE user_id = ?", c.get("userId"));
+    return c.body(null, 204);
+  });
+
   // ---- doodles ----------------------------------------------------------
   app.post(
     "/doodles",

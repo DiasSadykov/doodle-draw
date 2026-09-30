@@ -307,6 +307,14 @@ describe("doodle api", () => {
     assert.equal((await call("POST", "/invites", dias.token)).status, 409);
   });
 
+  it("validates and forgets push registrations", async () => {
+    assert.equal((await call("PUT", "/device", aruzhan.token, { apnsToken: "../../x" })).status, 400);
+    assert.equal((await call("PUT", "/device", aruzhan.token, { apnsToken: "abc", widgetToken: "zz!" })).status, 400);
+    assert.equal((await call("PUT", "/device", aruzhan.token, { apnsToken: "abc", sandbox: true })).status, 204);
+    assert.equal((await call("DELETE", "/device", aruzhan.token)).status, 204);
+    assert.equal((await call("DELETE", "/device", aruzhan.token)).status, 204); // idempotent
+  });
+
   it("sends a doodle, pushes the partner, and serves it to both sides", async () => {
     assert.equal((await call("PUT", "/device", aruzhan.token, { apnsToken: "abc" })).status, 204);
 

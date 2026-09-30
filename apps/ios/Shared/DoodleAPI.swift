@@ -60,6 +60,38 @@ enum DoodleSession {
     }
 }
 
+// MARK: - Push tokens (shared: the app gets one, the widget gets another)
+
+enum DoodleDevice {
+    private static var defaults: UserDefaults { DoodleAppGroup.sharedDefaults ?? .standard }
+
+    static var apnsToken: String? {
+        get { defaults.string(forKey: "apnsToken") }
+        set { defaults.set(newValue, forKey: "apnsToken") }
+    }
+    static var widgetToken: String? {
+        get { defaults.string(forKey: "widgetPushToken") }
+        set { defaults.set(newValue, forKey: "widgetPushToken") }
+    }
+
+    /// Dev-signed builds (from Xcode) use Apple's sandbox push server; TestFlight/App Store builds
+    /// carry no embedded profile and use production.
+    static var isSandbox: Bool {
+        Bundle.main.path(forResource: "embedded", ofType: "mobileprovision") != nil
+    }
+
+    static func hex(_ data: Data) -> String {
+        data.map { String(format: "%02x", $0) }.joined()
+    }
+
+    /// Tells the server where to push. Needs a session and the app's token; the widget token is optional.
+    /// Called from both the app and the widget, whichever learns something new.
+    static func register() async {
+        guard DoodleSession.token != nil, let apnsToken else { return }
+        try? await DoodleAPI.registerDevice(apnsToken: apnsToken, widgetToken: widgetToken, sandbox: isSandbox)
+    }
+}
+
 // MARK: - Client
 
 enum DoodleAPI {
@@ -107,16 +139,37 @@ enum DoodleAPI {
 
     // Auth
 
-    /// Test sign-in (server provider "dev"). Replaced by Google / Apple later.
+    /// Exchanges a provider's token ("apple", or "dev" for testing) for a Doodle session.
+    /// `name` is only used when the account is created (Apple reveals it once).
     @discardableResult
-    static func signIn(name: String, devKey: String) async throws -> APIUser {
+    static func signIn(provider: String, token: String, name: String? = nil) async throws -> APIUser {
         struct Response: Decodable { let token: String; let user: APIUser }
-        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
-        let token = devKey.isEmpty ? trimmed : "\(devKey):\(trimmed)"
-        let data = try await perform("POST", "/auth", json: ["provider": "dev", "token": token], auth: false)
+        var body = ["provider": provider, "token": token]
+        if let name, !name.isEmpty { body["name"] = name }
+        let data = try await perform("POST", "/auth", json: body, auth: false)
         let response = try decode(Response.self, data)
         DoodleSession.token = response.token
         return response.user
+    }
+
+    /// Test sign-in (server provider "dev"), for trying pairing with fake people.
+    @discardableResult
+    static func signInForTesting(name: String, devKey: String) async throws -> APIUser {
+        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        return try await signIn(provider: "dev", token: devKey.isEmpty ? trimmed : "\(devKey):\(trimmed)")
+    }
+
+    // Push registration
+
+    static func registerDevice(apnsToken: String, widgetToken: String?, sandbox: Bool) async throws {
+        var body: [String: Any] = ["apnsToken": apnsToken, "sandbox": sandbox]
+        if let widgetToken { body["widgetToken"] = widgetToken }
+        _ = try await perform("PUT", "/device", json: body)
+    }
+
+    /// Takes the token explicitly because it's called while signing out, after the session is cleared.
+    static func unregisterDevice(bearer: String) async {
+        _ = try? await perform("DELETE", "/device", bearer: bearer)
     }
 
     static func me() async throws -> APIMe {
@@ -188,7 +241,8 @@ enum DoodleAPI {
         query: [URLQueryItem] = [],
         json: [String: Any]? = nil,
         multipart: (body: Data, boundary: String)? = nil,
-        auth: Bool = true
+        auth: Bool = true,
+        bearer: String? = nil
     ) async throws -> Data {
         var components = URLComponents(url: baseURL.appendingPathComponent(path), resolvingAgainstBaseURL: false)!
         if !query.isEmpty { components.queryItems = query }
@@ -196,7 +250,7 @@ enum DoodleAPI {
         request.httpMethod = method
 
         if auth {
-            guard let token = DoodleSession.token else { throw APIError(status: 401, code: "unauthorized") }
+            guard let token = bearer ?? DoodleSession.token else { throw APIError(status: 401, code: "unauthorized") }
             request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         }
         if let json {

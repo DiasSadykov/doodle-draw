@@ -25,7 +25,10 @@ struct RootView: View {
         .task { await appState.bootstrap() }
         .onOpenURL { url in Task { await appState.handle(url: url) } }
         // Fresh doodles whenever we land on a screen that shows them, and when returning to the app.
-        .task(id: appState.route) { await appState.refresh() }
+        .task(id: appState.route) {
+            await appState.refresh()
+            if appState.route == .canvas { await appState.enableNotifications() }
+        }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active { Task { await appState.refresh() } }
         }

@@ -56,10 +56,8 @@ struct DoodleProvider: TimelineProvider {
 }
 
 struct DoodleHomeWidget: Widget {
-    let kind = DoodleAppGroup.widgetKind
-
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: kind, provider: DoodleProvider()) { entry in
+        StaticConfiguration(kind: DoodleAppGroup.widgetKind, provider: DoodleProvider()) { entry in
             DoodleWidgetView(entry: entry)
                 .containerBackground(for: .widget) {
                     Color(red: 1, green: 0.988, blue: 0.961)
@@ -69,6 +67,16 @@ struct DoodleHomeWidget: Widget {
         .description("Little drawings from your person, on your Home Screen.")
         .supportedFamilies([.systemSmall, .systemMedium, .accessoryRectangular])
         .contentMarginsDisabled()
+        // The server pushes the widget to refresh the moment a doodle is sent.
+        .pushHandler(DoodlePushHandler.self)
+    }
+}
+
+/// WidgetKit hands us a push token for this widget; the server needs it to wake the widget.
+struct DoodlePushHandler: WidgetPushHandler {
+    func pushTokenDidChange(_ pushInfo: WidgetPushInfo, widgets: [WidgetInfo]) {
+        DoodleDevice.widgetToken = DoodleDevice.hex(pushInfo.token)
+        Task { await DoodleDevice.register() }
     }
 }
 

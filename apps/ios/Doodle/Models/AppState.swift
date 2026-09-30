@@ -1,5 +1,6 @@
 import Combine
 import PencilKit
+import UserNotifications
 import SwiftUI
 import UIKit
 
@@ -121,11 +122,25 @@ final class AppState: ObservableObject {
         }
     }
 
-    func signIn(name: String, devKey: String) async {
+    func signInWithApple(identityToken: String, givenName: String?) async {
+        // Apple only reveals the name once. Keep it so a failed first attempt doesn't lose it.
+        let defaults = UserDefaults.standard
+        if let givenName, !givenName.isEmpty { defaults.set(givenName, forKey: "appleGivenName") }
+        await signIn {
+            try await DoodleAPI.signIn(provider: "apple", token: identityToken, name: defaults.string(forKey: "appleGivenName"))
+        }
+    }
+
+    /// Fake-person login for trying pairing in debug builds.
+    func signInForTesting(name: String, devKey: String) async {
+        await signIn { try await DoodleAPI.signInForTesting(name: name, devKey: devKey) }
+    }
+
+    private func signIn(_ perform: () async throws -> APIUser) async {
         isBusy = true
         defer { isBusy = false }
         do {
-            try await DoodleAPI.signIn(name: name, devKey: devKey)
+            try await perform()
             try await loadMe()
         } catch {
             alertMessage = error.localizedDescription
@@ -133,6 +148,10 @@ final class AppState: ObservableObject {
     }
 
     func signOut() {
+        // Stop pushes to this phone for the person who just left.
+        if let token = DoodleSession.token {
+            Task { await DoodleAPI.unregisterDevice(bearer: token) }
+        }
         DoodleSession.token = nil
         DoodleSharedStore.clear()
         resetSessionState()
@@ -158,6 +177,15 @@ final class AppState: ObservableObject {
         imageCache = [:]
         canvasDrawing = PKDrawing()
         backgroundPhoto = nil
+    }
+
+    // MARK: - Notifications
+
+    /// Asked once the person is paired, when "your person sent a doodle" actually makes sense.
+    func enableNotifications() async {
+        let granted = (try? await UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound])) ?? false
+        if granted { UIApplication.shared.registerForRemoteNotifications() }
+        await DoodleDevice.register()
     }
 
     // MARK: - Pairing
