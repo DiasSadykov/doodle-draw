@@ -155,7 +155,7 @@ export function createApp({
 
     let identity;
     try {
-      identity = await verifiers[provider]!(token);
+      identity = await verifiers[provider]!(token, { name: typeof body.name === "string" ? body.name : undefined });
     } catch {
       throw new ApiError(401, "invalid_token");
     }
@@ -300,13 +300,17 @@ export function createApp({
     const body = await readJson(c);
     const apnsToken = typeof body.apnsToken === "string" ? body.apnsToken : "";
     const widgetToken = typeof body.widgetToken === "string" ? body.widgetToken : null;
-    if (!apnsToken) throw new ApiError(400, "bad_request");
+    // Push tokens are hex strings; anything else is a bug or an attack.
+    const isHex = (s: string) => /^[0-9a-fA-F]{1,512}$/.test(s);
+    if (!isHex(apnsToken) || (widgetToken !== null && !isHex(widgetToken))) throw new ApiError(400, "bad_request");
     run(
-      `INSERT INTO devices (user_id, apns_token, widget_token) VALUES (?, ?, ?)
-       ON CONFLICT (user_id) DO UPDATE SET apns_token = excluded.apns_token, widget_token = excluded.widget_token`,
+      `INSERT INTO devices (user_id, apns_token, widget_token, apns_sandbox) VALUES (?, ?, ?, ?)
+       ON CONFLICT (user_id) DO UPDATE SET apns_token = excluded.apns_token,
+         widget_token = excluded.widget_token, apns_sandbox = excluded.apns_sandbox`,
       c.get("userId"),
       apnsToken,
       widgetToken,
+      body.sandbox === true ? 1 : 0,
     );
     return c.body(null, 204);
   });
@@ -354,17 +358,16 @@ export function createApp({
 
       // Best effort: a failed push must never fail the upload.
       const partnerId = pair.user_a === me ? pair.user_b : pair.user_a;
-      const device = get<{ apns_token: string; widget_token: string | null }>(
-        "SELECT apns_token, widget_token FROM devices WHERE user_id = ?",
+      const device = get<{ apns_token: string; widget_token: string | null; apns_sandbox: number }>(
+        "SELECT apns_token, widget_token, apns_sandbox FROM devices WHERE user_id = ?",
         partnerId,
       );
       const sender = get<UserRow>("SELECT id, name FROM users WHERE id = ?", me)!;
       pusher
-        .notifyDoodle(device && { apnsToken: device.apns_token, widgetToken: device.widget_token }, {
-          id: row.id,
-          senderName: sender.name,
-          createdAt: row.created_at,
-        })
+        .notifyDoodle(
+          device && { apnsToken: device.apns_token, widgetToken: device.widget_token, sandbox: device.apns_sandbox === 1 },
+          { id: row.id, senderName: sender.name, createdAt: row.created_at },
+        )
         .catch((e) => console.error("push failed", e));
 
       return c.json(toDoodle(row, me), 201);

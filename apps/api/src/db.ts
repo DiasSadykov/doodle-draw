@@ -37,7 +37,8 @@ CREATE TABLE IF NOT EXISTS pairs (
 CREATE TABLE IF NOT EXISTS devices (
   user_id      TEXT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
   apns_token   TEXT NOT NULL,
-  widget_token TEXT
+  widget_token TEXT,
+  apns_sandbox INTEGER NOT NULL DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS doodles (
@@ -50,6 +51,14 @@ CREATE TABLE IF NOT EXISTS doodles (
 CREATE INDEX IF NOT EXISTS doodles_pair_created ON doodles (pair_id, created_at DESC);
 `;
 
+/** Columns added after the first deploy. CREATE TABLE IF NOT EXISTS won't add them to an existing table. */
+function migrate(db: DatabaseSync) {
+  const columns = (db.prepare("PRAGMA table_info(devices)").all() as { name: string }[]).map((c) => c.name);
+  if (!columns.includes("apns_sandbox")) {
+    db.exec("ALTER TABLE devices ADD COLUMN apns_sandbox INTEGER NOT NULL DEFAULT 0");
+  }
+}
+
 /** Open (and migrate) the database. Pass ":memory:" for tests. */
 export function openDb(path: string): DatabaseSync {
   if (path !== ":memory:") mkdirSync(dirname(path), { recursive: true });
@@ -57,5 +66,6 @@ export function openDb(path: string): DatabaseSync {
   db.exec("PRAGMA journal_mode = WAL");
   db.exec("PRAGMA foreign_keys = ON");
   db.exec(SCHEMA);
+  migrate(db);
   return db;
 }

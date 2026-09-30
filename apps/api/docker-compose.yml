@@ -5,6 +5,8 @@ services:
     env_file: .env
     volumes:
       - data:/data
+      # Secrets that must survive redeploys (rsync --delete wipes this folder). Holds AuthKey_XXXX.p8.
+      - /opt/doodle-secrets:/secrets:ro
 
   caddy:
     image: caddy:2
