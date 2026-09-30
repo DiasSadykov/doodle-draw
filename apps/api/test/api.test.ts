@@ -115,6 +115,26 @@ describe("apns pusher", () => {
     assert.deepEqual(dead, ["abc123"]);
   });
 
+  it("retries on the other Apple server when a token is from the other environment", async () => {
+    // The widget token is sandbox-only, but the device is flagged production.
+    const { pusher, sent, dead } = make((req) =>
+      req.token === "def456" && !req.sandbox
+        ? { status: 400, body: '{"reason":"BadDeviceToken"}' }
+        : { status: 200, body: "" },
+    );
+    await pusher.notifyDoodle({ apnsToken: "abc123", widgetToken: "def456", sandbox: false }, doodle);
+    const widgetTries = sent.filter((r) => r.token === "def456");
+    assert.deepEqual(widgetTries.map((r) => r.sandbox), [false, true]); // production first, then sandbox
+    assert.equal(sent.filter((r) => r.token === "abc123").length, 1); // healthy tokens aren't retried
+    assert.deepEqual(dead, []);
+  });
+
+  it("gives up quietly when both servers reject the token", async () => {
+    const { pusher, sent } = make(() => ({ status: 400, body: '{"reason":"BadDeviceToken"}' }));
+    await pusher.notifyDoodle({ apnsToken: "abc123", widgetToken: null, sandbox: false }, doodle);
+    assert.equal(sent.length, 2); // one try per server, no loop
+  });
+
   it("never throws when Apple is unreachable", async () => {
     const pusher = apnsPusher({
       teamId: "T",

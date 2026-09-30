@@ -109,21 +109,31 @@ export function apnsPusher(opts: ApnsOptions): Pusher {
     payload: unknown,
   ) {
     if (!isHex(token)) return; // never let a stored value shape the request path
-    const res = await transport({
-      sandbox,
-      token,
-      headers: { authorization: `bearer ${await providerToken()}`, "content-type": "application/json", ...headers },
-      body: JSON.stringify(payload),
-    });
-    if (res.status === 200) return;
-
-    const reason = (() => {
+    const allHeaders = { authorization: `bearer ${await providerToken()}`, "content-type": "application/json", ...headers };
+    const body = JSON.stringify(payload);
+    const reasonOf = (res: ApnsResponse) => {
       try {
         return (JSON.parse(res.body) as { reason?: string }).reason ?? "";
       } catch {
         return "";
       }
-    })();
+    };
+
+    let res = await transport({ sandbox, token, headers: allHeaders, body });
+    if (res.status === 200) return;
+
+    // A token minted by a different kind of build (Xcode = sandbox, TestFlight/App Store = production)
+    // is rejected as BadDeviceToken. This happens when a widget keeps its old token after the app is
+    // reinstalled from another source, so try the other Apple server before giving up.
+    if (res.status === 400 && reasonOf(res) === "BadDeviceToken") {
+      const retry = await transport({ sandbox: !sandbox, token, headers: allHeaders, body });
+      if (retry.status === 200) {
+        console.log(`[push] ${kind} token only works on ${sandbox ? "production" : "sandbox"}; delivered there`);
+        return;
+      }
+    }
+
+    const reason = reasonOf(res);
     console.error(`[push] ${kind} rejected: ${res.status} ${reason}`);
     if (res.status === 403) cached = undefined; // expired/invalid provider token: sign a new one next time
     if (res.status === 410) opts.onUnregistered?.(token);
