@@ -1,0 +1,19 @@
+# Xcode / macOS
+**/xcuserdata/
+**/DerivedData/
+*.xcuserstate
+.DS_Store
+
+# Swift PM
+.build/
+.swiftpm/
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+
+# Backend
+node_modules/
+dist/
+apps/api/data/

@@ -1,0 +1,25 @@
+services:
+  api:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - data:/data
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN: ${DOMAIN}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy:/data
+    depends_on:
+      - api
+
+volumes:
+  data:
+  caddy:

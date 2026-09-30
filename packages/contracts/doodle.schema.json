@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://doodle.app/schemas/doodle.json",
+  "title": "Doodle",
+  "description": "A doodle as returned by POST /doodles and GET /doodles. The JPEG itself is fetched from GET /doodles/{id}/image.",
+  "type": "object",
+  "required": ["id", "from", "hasPhoto", "createdAt"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string", "format": "uuid" },
+    "from": { "type": "string", "enum": ["you", "partner"], "description": "Relative to the caller." },
+    "hasPhoto": { "type": "boolean" },
+    "createdAt": { "type": "string", "format": "date-time" }
+  }
+}

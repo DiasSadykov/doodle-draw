@@ -1,0 +1,504 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		05F8D449EE324C17B6518E6F /* AppIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54F86D862B5543DCA6484190 /* AppIconView.swift */; };
+		10C9FA35F0F84D6498036C90 /* SignInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 313FBC341459450DB8E036A8 /* SignInView.swift */; };
+		10FFBA734B9A41C7ACF95685 /* DoodleWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AD60832005043E4A9EB6071 /* DoodleWidget.swift */; };
+		217044676AC14014A3113483 /* DoodleWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F3916B485734911B4177855 /* DoodleWidgetBundle.swift */; };
+		537D09B55FFC4C91BE72ED36 /* HistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70C5FCDA9A2241BC823844C7 /* HistoryView.swift */; };
+		558A5FD9E71A45F68EB676C7 /* DoodleTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 533A0B4DE9124129BE01CC34 /* DoodleTheme.swift */; };
+		58A376AAF1704B539D1E15F6 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2AF97756F644BCBB78CDD4F /* RootView.swift */; };
+		5B348C35EECC4C60B04BDD4D /* LatestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B6E721A954A42E3B9298B99 /* LatestView.swift */; };
+		5E66A7CFC5A545269A34FDC1 /* PairView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D163E3A14A14582B666E1A3 /* PairView.swift */; };
+		6BAB5F1B4209470584B113D0 /* DoodleSharedStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA89C690BCAB4D589A3DE21C /* DoodleSharedStore.swift */; };
+		A1B2C3D4E5F60718293A4B5D /* DoodleAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4B5C /* DoodleAPI.swift */; };
+		8401272C1D874096BE61BFF2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 85701B6B2B3B40EBBADDDAD4 /* Assets.xcassets */; };
+		B2E6AFBB73C94375895C08C9 /* Drawing.swift in Sources */ = {isa = PBXBuildFile; fileRef = F02BCBD652FF4DE18A6135FA /* Drawing.swift */; };
+		BB8AB074A8154F7CBF77FCB7 /* CanvasScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3F51F0D7EF44D0EA5F54A65 /* CanvasScreen.swift */; };
+		CC4552CA67E44342AAB97587 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C88B0D1BC0243519ED2508E /* AppState.swift */; };
+		CE85D17BB27E46AEA3931B73 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 597983E7625547C9B85745B0 /* Assets.xcassets */; };
+		F256D61719CF48E8B8FCE624 /* DoodleWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = B58BCF6184094AC2991F8EB7 /* DoodleWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		F68AFDC027A14414829FFB0F /* DoodleApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD6630E2B7464B2690B7737F /* DoodleApp.swift */; };
+		F9412734871B4FDBBE6892C9 /* DoodleSharedStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA89C690BCAB4D589A3DE21C /* DoodleSharedStore.swift */; };
+		A1B2C3D4E5F60718293A4B5E /* DoodleAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4B5C /* DoodleAPI.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		1F869A512AFE452BB8690C89 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FB9E7BCDE47C4AE3993364EF /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 07FC377BFFFB488E9B7642DD;
+			remoteInfo = DoodleWidgetExtension;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		7C75D5658E4C42C19774CCF0 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				F256D61719CF48E8B8FCE624 /* DoodleWidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		1C88B0D1BC0243519ED2508E /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
+		1D163E3A14A14582B666E1A3 /* PairView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PairView.swift; sourceTree = "<group>"; };
+		313FBC341459450DB8E036A8 /* SignInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInView.swift; sourceTree = "<group>"; };
+		533A0B4DE9124129BE01CC34 /* DoodleTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DoodleTheme.swift; sourceTree = "<group>"; };
+		53AD8CA4A8F14D1BA1989FE6 /* Doodle.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Doodle.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		54F86D862B5543DCA6484190 /* AppIconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppIconView.swift; sourceTree = "<group>"; };
+		597983E7625547C9B85745B0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		5AD60832005043E4A9EB6071 /* DoodleWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DoodleWidget.swift; sourceTree = "<group>"; };
+		5B6E721A954A42E3B9298B99 /* LatestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LatestView.swift; sourceTree = "<group>"; };
+		70C5FCDA9A2241BC823844C7 /* HistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryView.swift; sourceTree = "<group>"; };
+		720224B905AD4FCCB37C2138 /* Doodle.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Doodle.entitlements; sourceTree = "<group>"; };
+		7F3916B485734911B4177855 /* DoodleWidgetBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DoodleWidgetBundle.swift; sourceTree = "<group>"; };
+		85701B6B2B3B40EBBADDDAD4 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		A34D714EB2784BC8B654B7D2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		B3F51F0D7EF44D0EA5F54A65 /* CanvasScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasScreen.swift; sourceTree = "<group>"; };
+		B58BCF6184094AC2991F8EB7 /* DoodleWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = DoodleWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		CD6630E2B7464B2690B7737F /* DoodleApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DoodleApp.swift; sourceTree = "<group>"; };
+		CE7B0407C4374C55857E718D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		F02BCBD652FF4DE18A6135FA /* Drawing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Drawing.swift; sourceTree = "<group>"; };
+		F2AF97756F644BCBB78CDD4F /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		FA1FD76A831141C894BADAEF /* DoodleWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DoodleWidget.entitlements; sourceTree = "<group>"; };
+		FA89C690BCAB4D589A3DE21C /* DoodleSharedStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DoodleSharedStore.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F60718293A4B5C /* DoodleAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DoodleAPI.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		497989F30F64443C849C9048 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C391BEE922DC4C478A898C74 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		0F1804D86AEF4763BF9C7B82 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				1C88B0D1BC0243519ED2508E /* AppState.swift */,
+				F02BCBD652FF4DE18A6135FA /* Drawing.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		38F977A1580E49F9BE211D6E /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				B3F51F0D7EF44D0EA5F54A65 /* CanvasScreen.swift */,
+				70C5FCDA9A2241BC823844C7 /* HistoryView.swift */,
+				5B6E721A954A42E3B9298B99 /* LatestView.swift */,
+				1D163E3A14A14582B666E1A3 /* PairView.swift */,
+				F2AF97756F644BCBB78CDD4F /* RootView.swift */,
+				313FBC341459450DB8E036A8 /* SignInView.swift */,
+				4B5D5CDAC4364019B8642850 /* Components */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		4B5D5CDAC4364019B8642850 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				54F86D862B5543DCA6484190 /* AppIconView.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		4FE33320924E4E9EB308E505 /* Doodle */ = {
+			isa = PBXGroup;
+			children = (
+				CD6630E2B7464B2690B7737F /* DoodleApp.swift */,
+				0F1804D86AEF4763BF9C7B82 /* Models */,
+				916BA823D3DC450EA4C2ADDD /* Theme */,
+				38F977A1580E49F9BE211D6E /* Views */,
+				597983E7625547C9B85745B0 /* Assets.xcassets */,
+				A34D714EB2784BC8B654B7D2 /* Info.plist */,
+				720224B905AD4FCCB37C2138 /* Doodle.entitlements */,
+			);
+			path = Doodle;
+			sourceTree = "<group>";
+		};
+		53AD532BCA3F4B8FBE99FB46 /* DoodleWidget */ = {
+			isa = PBXGroup;
+			children = (
+				5AD60832005043E4A9EB6071 /* DoodleWidget.swift */,
+				7F3916B485734911B4177855 /* DoodleWidgetBundle.swift */,
+				85701B6B2B3B40EBBADDDAD4 /* Assets.xcassets */,
+				CE7B0407C4374C55857E718D /* Info.plist */,
+				FA1FD76A831141C894BADAEF /* DoodleWidget.entitlements */,
+			);
+			path = DoodleWidget;
+			sourceTree = "<group>";
+		};
+		5B27C2463FAE4EA7BE38916F = {
+			isa = PBXGroup;
+			children = (
+				4FE33320924E4E9EB308E505 /* Doodle */,
+				53AD532BCA3F4B8FBE99FB46 /* DoodleWidget */,
+				70B52463AA86423C9C351940 /* Shared */,
+				CC696F7DDDBC4689B6C30D5E /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		70B52463AA86423C9C351940 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				FA89C690BCAB4D589A3DE21C /* DoodleSharedStore.swift */,
+				A1B2C3D4E5F60718293A4B5C /* DoodleAPI.swift */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		916BA823D3DC450EA4C2ADDD /* Theme */ = {
+			isa = PBXGroup;
+			children = (
+				533A0B4DE9124129BE01CC34 /* DoodleTheme.swift */,
+			);
+			path = Theme;
+			sourceTree = "<group>";
+		};
+		CC696F7DDDBC4689B6C30D5E /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				53AD8CA4A8F14D1BA1989FE6 /* Doodle.app */,
+				B58BCF6184094AC2991F8EB7 /* DoodleWidgetExtension.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		07FC377BFFFB488E9B7642DD /* DoodleWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 9B6B14D8E6F0448EA31188D1 /* Build configuration list for PBXNativeTarget "DoodleWidgetExtension" */;
+			buildPhases = (
+				1831CF4CC83D4D94A8CF193F /* Sources */,
+				C391BEE922DC4C478A898C74 /* Frameworks */,
+				2A1E6E0851AB4E98906CCAFB /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = DoodleWidgetExtension;
+			productName = DoodleWidgetExtension;
+			productReference = B58BCF6184094AC2991F8EB7 /* DoodleWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		8CDB22DFE6BB470E90D4C6C7 /* Doodle */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AE1581E342334126B496F442 /* Build configuration list for PBXNativeTarget "Doodle" */;
+			buildPhases = (
+				E082B6E4D0AB48BBACFFE772 /* Sources */,
+				497989F30F64443C849C9048 /* Frameworks */,
+				3E59FC9A05FB47A0BA6AA109 /* Resources */,
+				7C75D5658E4C42C19774CCF0 /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				C8D6E585672540CE9C2F6842 /* PBXTargetDependency */,
+			);
+			name = Doodle;
+			productName = Doodle;
+			productReference = 53AD8CA4A8F14D1BA1989FE6 /* Doodle.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		FB9E7BCDE47C4AE3993364EF /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1600;
+				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+					07FC377BFFFB488E9B7642DD = {
+						CreatedOnToolsVersion = 16.0;
+					};
+					8CDB22DFE6BB470E90D4C6C7 = {
+						CreatedOnToolsVersion = 16.0;
+					};
+				};
+			};
+			buildConfigurationList = EA72217FB2494BEBA946B595 /* Build configuration list for PBXProject "Doodle" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 5B27C2463FAE4EA7BE38916F;
+			productRefGroup = CC696F7DDDBC4689B6C30D5E /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				8CDB22DFE6BB470E90D4C6C7 /* Doodle */,
+				07FC377BFFFB488E9B7642DD /* DoodleWidgetExtension */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		2A1E6E0851AB4E98906CCAFB /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8401272C1D874096BE61BFF2 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3E59FC9A05FB47A0BA6AA109 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CE85D17BB27E46AEA3931B73 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		1831CF4CC83D4D94A8CF193F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6BAB5F1B4209470584B113D0 /* DoodleSharedStore.swift in Sources */,
+				A1B2C3D4E5F60718293A4B5D /* DoodleAPI.swift in Sources */,
+				10FFBA734B9A41C7ACF95685 /* DoodleWidget.swift in Sources */,
+				217044676AC14014A3113483 /* DoodleWidgetBundle.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E082B6E4D0AB48BBACFFE772 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F68AFDC027A14414829FFB0F /* DoodleApp.swift in Sources */,
+				CC4552CA67E44342AAB97587 /* AppState.swift in Sources */,
+				B2E6AFBB73C94375895C08C9 /* Drawing.swift in Sources */,
+				558A5FD9E71A45F68EB676C7 /* DoodleTheme.swift in Sources */,
+				BB8AB074A8154F7CBF77FCB7 /* CanvasScreen.swift in Sources */,
+				05F8D449EE324C17B6518E6F /* AppIconView.swift in Sources */,
+				537D09B55FFC4C91BE72ED36 /* HistoryView.swift in Sources */,
+				5B348C35EECC4C60B04BDD4D /* LatestView.swift in Sources */,
+				5E66A7CFC5A545269A34FDC1 /* PairView.swift in Sources */,
+				58A376AAF1704B539D1E15F6 /* RootView.swift in Sources */,
+				10C9FA35F0F84D6498036C90 /* SignInView.swift in Sources */,
+				F9412734871B4FDBBE6892C9 /* DoodleSharedStore.swift in Sources */,
+				A1B2C3D4E5F60718293A4B5E /* DoodleAPI.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		C8D6E585672540CE9C2F6842 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 07FC377BFFFB488E9B7642DD /* DoodleWidgetExtension */;
+			targetProxy = 1F869A512AFE452BB8690C89 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		402D4FD2B5FD4105991580B6 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = DoodleWidget/DoodleWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4H882VRXWJ;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = DoodleWidget/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = app.doodle.ios.widget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		4BEDEBD192CA493497E01198 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		51F9C311DFE446FC8B683992 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Doodle/Doodle.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4H882VRXWJ;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Doodle/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = app.doodle.ios;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		6E3E1EEFB6EC4F508FA64B15 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_TESTABILITY = YES;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		BDDBFE67A9154AF3AC5E8827 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = DoodleWidget/DoodleWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4H882VRXWJ;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = DoodleWidget/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = app.doodle.ios.widget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		CA5B2E149917410F84170632 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Doodle/Doodle.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4H882VRXWJ;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Doodle/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = app.doodle.ios;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		9B6B14D8E6F0448EA31188D1 /* Build configuration list for PBXNativeTarget "DoodleWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BDDBFE67A9154AF3AC5E8827 /* Debug */,
+				402D4FD2B5FD4105991580B6 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		AE1581E342334126B496F442 /* Build configuration list for PBXNativeTarget "Doodle" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				51F9C311DFE446FC8B683992 /* Debug */,
+				CA5B2E149917410F84170632 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		EA72217FB2494BEBA946B595 /* Build configuration list for PBXProject "Doodle" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6E3E1EEFB6EC4F508FA64B15 /* Debug */,
+				4BEDEBD192CA493497E01198 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = FB9E7BCDE47C4AE3993364EF /* Project object */;
+}
