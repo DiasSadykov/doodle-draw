@@ -35,6 +35,8 @@
 	<false/>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>Doodle uses the camera so you can take a photo and draw on it for your person.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Doodle needs photo access so you can draw on a picture for your person.</string>
 	<key>UIApplicationSceneManifest</key>

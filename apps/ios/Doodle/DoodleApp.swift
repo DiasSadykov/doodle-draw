@@ -5,13 +5,28 @@ import UserNotifications
 struct DoodleApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @StateObject private var appState = AppState()
+    #if DEBUG
+    @AppStorage("prototypeMode") private var prototypeMode = false
+    #endif
 
     var body: some Scene {
         WindowGroup {
-            RootView()
-                .environmentObject(appState)
-                .tint(DoodleTheme.pink)
+            #if DEBUG
+            if prototypeMode {
+                ProtoRootView().tint(DoodleTheme.pink)
+            } else {
+                app
+            }
+            #else
+            app
+            #endif
         }
+    }
+
+    private var app: some View {
+        RootView()
+            .environmentObject(appState)
+            .tint(DoodleTheme.pink)
     }
 }
 
@@ -36,4 +51,13 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
     ) async -> UNNotificationPresentationOptions {
         [.banner, .sound]
     }
+
+    #if DEBUG
+    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse) async {
+        let userInfo = response.notification.request.content.userInfo
+        await MainActor.run {
+            NotificationCenter.default.post(name: .doodleNotificationTapped, object: nil, userInfo: userInfo)
+        }
+    }
+    #endif
 }

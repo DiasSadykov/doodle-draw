@@ -13,6 +13,10 @@ struct PairView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack {
+                #if DEBUG
+                Button("Try the Multiple users redesign") { UserDefaults.standard.set(true, forKey: "prototypeMode") }
+                    .font(.subheadline.weight(.semibold))
+                #endif
                 Spacer()
                 Button("Sign out") { appState.signOut() }
                     .font(.subheadline)
