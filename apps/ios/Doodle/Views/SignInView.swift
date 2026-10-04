@@ -35,6 +35,9 @@ struct SignInView: View {
             TestSignIn()
                 .padding(.horizontal, 28)
                 .padding(.top, 16)
+            PrototypeEntry()
+                .padding(.horizontal, 28)
+                .padding(.top, 8)
             #endif
 
             Color.clear.frame(height: 32)
@@ -94,6 +97,17 @@ private struct TestSignIn: View {
             .frame(height: 44)
             .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
             .foregroundStyle(.primary)
+    }
+}
+
+/// Opens the Multiple users redesign prototype, which runs on sample data. Not in release builds.
+private struct PrototypeEntry: View {
+    @AppStorage("prototypeMode") private var prototypeMode = false
+
+    var body: some View {
+        Button("Try the Multiple users redesign") { prototypeMode = true }
+            .font(.footnote.weight(.semibold))
+            .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 #endif

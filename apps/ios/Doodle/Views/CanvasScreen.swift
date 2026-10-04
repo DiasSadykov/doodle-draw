@@ -138,6 +138,11 @@ struct CanvasScreen: View {
                 Button("Unpair", systemImage: "person.2.slash", role: .destructive) {
                     confirmUnpair = true
                 }
+                #if DEBUG
+                Button("Try the Multiple users redesign", systemImage: "sparkles") {
+                    UserDefaults.standard.set(true, forKey: "prototypeMode")
+                }
+                #endif
                 Button("Sign out", systemImage: "rectangle.portrait.and.arrow.right") {
                     appState.signOut()
                 }

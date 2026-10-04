@@ -27,6 +27,12 @@
 		F68AFDC027A14414829FFB0F /* DoodleApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD6630E2B7464B2690B7737F /* DoodleApp.swift */; };
 		F9412734871B4FDBBE6892C9 /* DoodleSharedStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA89C690BCAB4D589A3DE21C /* DoodleSharedStore.swift */; };
 		A1B2C3D4E5F60718293A4B5E /* DoodleAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4B5C /* DoodleAPI.swift */; };
+		355D5C31CCE444A8BBCBA2D8 /* PrototypeStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = C468B00DACCF4995A0132008 /* PrototypeStore.swift */; };
+		DAEBCC1A4B4C4916ADE207C3 /* PrototypeComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0912821F9FC94F2B9B676CA6 /* PrototypeComponents.swift */; };
+		92E99648885D4AF5A219BE15 /* PrototypeRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3312A3867AEC432CA16F358B /* PrototypeRootView.swift */; };
+		954D3580A3574AD6B52BB2A8 /* PrototypePersonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7487DAE1B17C4FBFB4A0FB70 /* PrototypePersonView.swift */; };
+		92F5988D23214FE7895BBA52 /* PrototypeDrawView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66CB39B813A743ACBB0B1B78 /* PrototypeDrawView.swift */; };
+		68A42196C83F432A9E8122BB /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = B2467095E7894E0AA038257F /* Lottie */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -77,6 +83,11 @@
 		FA1FD76A831141C894BADAEF /* DoodleWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DoodleWidget.entitlements; sourceTree = "<group>"; };
 		FA89C690BCAB4D589A3DE21C /* DoodleSharedStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DoodleSharedStore.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F60718293A4B5C /* DoodleAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DoodleAPI.swift; sourceTree = "<group>"; };
+		C468B00DACCF4995A0132008 /* PrototypeStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrototypeStore.swift; sourceTree = "<group>"; };
+		0912821F9FC94F2B9B676CA6 /* PrototypeComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrototypeComponents.swift; sourceTree = "<group>"; };
+		3312A3867AEC432CA16F358B /* PrototypeRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrototypeRootView.swift; sourceTree = "<group>"; };
+		7487DAE1B17C4FBFB4A0FB70 /* PrototypePersonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrototypePersonView.swift; sourceTree = "<group>"; };
+		66CB39B813A743ACBB0B1B78 /* PrototypeDrawView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrototypeDrawView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -84,6 +95,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				68A42196C83F432A9E8122BB /* Lottie in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -131,6 +143,7 @@
 		4FE33320924E4E9EB308E505 /* Doodle */ = {
 			isa = PBXGroup;
 			children = (
+				547B5C8A7BF04326A46DAAD3 /* Prototype */,
 				CD6630E2B7464B2690B7737F /* DoodleApp.swift */,
 				0F1804D86AEF4763BF9C7B82 /* Models */,
 				916BA823D3DC450EA4C2ADDD /* Theme */,
@@ -190,6 +203,18 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		547B5C8A7BF04326A46DAAD3 /* Prototype */ = {
+			isa = PBXGroup;
+			children = (
+				C468B00DACCF4995A0132008 /* PrototypeStore.swift */,
+				0912821F9FC94F2B9B676CA6 /* PrototypeComponents.swift */,
+				3312A3867AEC432CA16F358B /* PrototypeRootView.swift */,
+				7487DAE1B17C4FBFB4A0FB70 /* PrototypePersonView.swift */,
+				66CB39B813A743ACBB0B1B78 /* PrototypeDrawView.swift */,
+			);
+			path = Prototype;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -225,6 +250,9 @@
 				C8D6E585672540CE9C2F6842 /* PBXTargetDependency */,
 			);
 			name = Doodle;
+			packageProductDependencies = (
+				B2467095E7894E0AA038257F /* Lottie */,
+			);
 			productName = Doodle;
 			productReference = 53AD8CA4A8F14D1BA1989FE6 /* Doodle.app */;
 			productType = "com.apple.product-type.application";
@@ -248,6 +276,9 @@
 				};
 			};
 			buildConfigurationList = EA72217FB2494BEBA946B595 /* Build configuration list for PBXProject "Doodle" */;
+			packageReferences = (
+				CD99F96D34FA4B938C4ABB98 /* XCRemoteSwiftPackageReference "lottie-spm" */,
+			);
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -301,6 +332,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				355D5C31CCE444A8BBCBA2D8 /* PrototypeStore.swift in Sources */,
+				DAEBCC1A4B4C4916ADE207C3 /* PrototypeComponents.swift in Sources */,
+				92E99648885D4AF5A219BE15 /* PrototypeRootView.swift in Sources */,
+				954D3580A3574AD6B52BB2A8 /* PrototypePersonView.swift in Sources */,
+				92F5988D23214FE7895BBA52 /* PrototypeDrawView.swift in Sources */,
 				F68AFDC027A14414829FFB0F /* DoodleApp.swift in Sources */,
 				CC4552CA67E44342AAB97587 /* AppState.swift in Sources */,
 				B2E6AFBB73C94375895C08C9 /* Drawing.swift in Sources */,
@@ -499,6 +535,24 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+/* Begin XCRemoteSwiftPackageReference section */
+		CD99F96D34FA4B938C4ABB98 /* XCRemoteSwiftPackageReference "lottie-spm" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/airbnb/lottie-spm.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 4.5.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		B2467095E7894E0AA038257F /* Lottie */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CD99F96D34FA4B938C4ABB98 /* XCRemoteSwiftPackageReference "lottie-spm" */;
+			productName = Lottie;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = FB9E7BCDE47C4AE3993364EF /* Project object */;
 }
