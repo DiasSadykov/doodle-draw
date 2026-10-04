@@ -44,6 +44,8 @@ final class PrototypeStore: ObservableObject {
     enum Scenario: String, CaseIterable, Identifiable {
         case onePersonNew = "1 person · new from Dias"
         case onePersonSentLast = "1 person · you sent last"
+        case onePersonNothingToday = "1 person · nothing from Dias today"
+        case onePersonOnlyYou = "1 person · only you have sent"
         case onePersonJustConnected = "1 person · just connected"
         case twoPeople = "2 people"
         case wall = "5 people"
@@ -57,6 +59,8 @@ final class PrototypeStore: ObservableObject {
     @Published private(set) var doodles: [ProtoDoodle] = []
     /// A doodle to bring into view, e.g. after a notification tap.
     @Published var focus: ProtoFocus?
+    /// People whose doodles arrive without a notification.
+    @Published private(set) var muted: Set<String> = []
     /// Bumps once a second while something time-based is waiting (a doodle "in flight", relative labels).
     @Published private(set) var now = Date()
 
@@ -88,6 +92,17 @@ final class PrototypeStore: ObservableObject {
 
     func latest(with personID: String) -> ProtoDoodle? { doodles(with: personID).last }
 
+    /// The home carousel: their doodles from today (plus any still unopened), newest first.
+    func todayFromThem(_ personID: String) -> [ProtoDoodle] {
+        doodles(with: personID).filter { !$0.fromMe && (Calendar.current.isDateInToday($0.createdAt) || !$0.opened) }.reversed()
+    }
+
+    /// What you've sent them today, newest first. The first one is on their Home Screen.
+    /// Earlier ones are on their profile.
+    func sentByMe(to personID: String) -> [ProtoDoodle] {
+        doodles(with: personID).filter { $0.fromMe && Calendar.current.isDateInToday($0.createdAt) }.reversed()
+    }
+
     func latestFromThem(_ personID: String) -> ProtoDoodle? { doodles(with: personID).last { !$0.fromMe } }
 
     /// Header subtitle rule (Figma, "C · One person"): show at most one line, top rule wins.
@@ -116,6 +131,18 @@ final class PrototypeStore: ObservableObject {
     }
 
     // MARK: - Actions
+
+    func toggleMute(_ personID: String) {
+        if muted.contains(personID) { muted.remove(personID) } else { muted.insert(personID) }
+    }
+
+    /// Ends the connection on both sides; the shared doodles go too (open question for the API).
+    func remove(_ personID: String) {
+        people.removeAll { $0.id == personID }
+        doodles.removeAll { $0.personID == personID }
+        muted.remove(personID)
+        if focus?.personID == personID { focus = nil }
+    }
 
     func markOpened(_ doodleID: String) {
         guard let i = doodles.firstIndex(where: { $0.id == doodleID }), !doodles[i].opened else { return }
@@ -160,6 +187,7 @@ final class PrototypeStore: ObservableObject {
             opened: false
         )
         doodles.append(doodle)
+        guard !muted.contains(personID) else { return }
 
         let content = UNMutableNotificationContent()
         content.title = person.name
@@ -189,6 +217,7 @@ final class PrototypeStore: ObservableObject {
     func load(_ scenario: Scenario) {
         self.scenario = scenario
         focus = nil
+        muted = []
         let s = Self.self
         let ago = { (minutes: Double) in Date.now.addingTimeInterval(-minutes * 60) }
         let longAgo = ago(60 * 24 * 40)
@@ -217,14 +246,24 @@ final class PrototypeStore: ObservableObject {
         case .onePersonNew:
             people = [connected(s.dias)]
             doodles = history + [
+                d("dias", me: false, 40, s.image("hi"), reaction: "❤️"),
                 d("dias", me: false, 9, s.image("note"), opened: false),
                 d("dias", me: false, 2, s.image("cat"), opened: false),
             ]
         case .onePersonSentLast:
             people = [connected(s.dias)]
             doodles = history + [
-                d("dias", me: false, 60 * 3, s.image("hi")),
-                d("dias", me: true, 12, s.image("sun"), reaction: "❤️"),
+                d("dias", me: false, 40, s.image("hi"), reaction: "😂"),
+                d("dias", me: true, 12, s.image("sun")),
+            ]
+        case .onePersonNothingToday:
+            people = [connected(s.dias)]
+            doodles = history
+        case .onePersonOnlyYou:
+            people = [connected(s.dias, since: ago(60 * 5))]
+            doodles = [
+                d("dias", me: true, 60 * 4, s.image("plant")),
+                d("dias", me: true, 30, s.image("sun")),
             ]
         case .onePersonJustConnected:
             people = [connected(s.dias, since: ago(1.5))]

@@ -8,6 +8,8 @@ screens are built as a SwiftUI prototype on sample data (this branch); nothing h
 the API yet.
 
 - **Flows (Figma):** [Doodle · Multiple users redesign (flows)](https://www.figma.com/design/YltpKPrfNmb1jwlKzOnVLQ/Portfolio?node-id=362-2)
+- **One-person home + profile (Figma, latest):** [One person · today](https://www.figma.com/design/YltpKPrfNmb1jwlKzOnVLQ/Portfolio?node-id=374-1532)
+  — supersedes the 1-person and history screens on the flows page.
 - **Try it:** run a Debug build → tap **Try the Multiple users redesign** (sign-in screen,
   *Pair up* screen, or the … menu on the canvas). Your avatar menu (top left) switches sample
   scenarios and can fake an incoming doodle + notification. **Leave prototype** goes back.
@@ -17,15 +19,15 @@ the API yet.
 
 | Area | Behaviour |
 |---|---|
-| Home, 1 person | Home is that person's page: their newest doodles first (swipe for older new ones), reactions, earlier doodles, *Draw back*. |
+| Home, 1 person | Home is that person's page and shows **today only**: their doodles from today in a swipeable carousel (newest first), and *Sent by you* below with what you sent them today. Empty states: “Nothing from Dias today” / “Nothing from Dias yet”. *Draw back* / *Draw another*. |
 | Home, 2+ people | Home becomes the **Wall**: one tile per person showing their latest doodle to you (yours if they haven't sent one). Invited people show as *Invite sent*. |
 | New doodles | *New* badge on tiles/cards; header says “2 new doodles” until you've swiped through them. |
 | Notification tap | Opens that person's page on that doodle (fixes today's blank-canvas landing). |
-| Reactions | One emoji per person per doodle; tap another to change, same to remove. Shown on the doodle with the reactor's avatar. |
+| Reactions | Long-press a doodle to react (it stays in place, the rest dims, the bar opens below). One emoji per person per doodle; tap another to change, same to remove. Shown as an emoji hanging off the doodle's corner. |
 | Drawing | Pen (colour sets, sizes, eraser), background colour, text, photo. All of it is rendered into the image on the phone before sending. |
 | Sending | *Draw for* one person or several; one doodle goes to everyone picked. |
-| History | Per person: *Earlier* row and a gallery (date headers, filter All / From them / From you). |
-| Profile | Name and photo, shown to the people you doodle with. |
+| Person profile | Tap their name in the header: every doodle between you (date headers, filter All / From them / From you), plus ··· → *Mute notifications* and *Remove*. |
+| Your profile | Name and photo, shown to the people you doodle with. |
 
 ## Backend needs
 
@@ -44,7 +46,8 @@ plus `doodle_recipients (doodle_id, user_id, seen_at, reaction)`.
 
 - `POST /doodles` takes `recipients: [userId]` (one upload, fan-out on the server, one push per recipient).
 - `GET /people/:id/doodles?before=…&limit=…` returns the history between me and one person,
-  newest first (pages for the gallery).
+  newest first (pages for the profile history). Home's “today” is the first page filtered on the
+  phone by local date, so no extra endpoint.
 - `GET /people` returns everyone I'm connected to or have invited, each with their latest doodle,
   `unseenCount`, and `connectedAt`. This powers the Wall in one request.
 
@@ -69,6 +72,11 @@ With several people, each widget instance needs to know whose doodles it shows (
 configuration on the phone). The server side is the widget push for every connection, not
 just the one partner.
 
+### 8. Mute and remove
+- `PUT /people/:id/mute { muted }`: the server skips pushes from that person (doodles still
+  arrive and the widget still updates). `muted` comes back on `GET /people`.
+- `DELETE /people/:id` ends the connection for both people.
+
 ### Not needed on the server
 Background colour, photo, text, brush size and colour sets are all baked into the JPEG on the
 phone. The emoji animations come from Google's Noto CDN on the phone (CC BY 4.0; credit goes
@@ -78,7 +86,7 @@ in the app's About screen).
 1. Should a widget show one chosen person, or “latest from anyone”?
 2. Is there a cap on how many people you can connect to?
 3. Migrate existing pairs to connections in place, or start fresh?
-4. Can people leave a connection (and what happens to the shared history)?
+4. When someone is removed, what happens to the shared history and to both widgets?
 5. Photo storage for profile pictures: same place as doodle images?
 
 ## Prototype notes

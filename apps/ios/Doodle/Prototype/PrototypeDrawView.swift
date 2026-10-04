@@ -44,8 +44,6 @@ struct ProtoDrawView: View {
     @State private var ink: UIColor = UIColor(DoodleTheme.inks[0])  // follows the selected slot
     @State private var tool: AppState.CanvasTool = .pen
     @AppStorage("protoBrush") private var brush: ProtoBrush = .medium
-    @AppStorage("protoDrawHintShown") private var hintShown = false
-    @State private var showsHint = false
     @State private var choosingRecipient = false
     /// The colour set showing in the row; swipe the row to change it. Remembered.
     @AppStorage("protoPalette") private var paletteName = ProtoPalette.all[0].name
@@ -166,7 +164,7 @@ struct ProtoDrawView: View {
                     .clipped()
                     .transition(.opacity)
             }
-            ProtoFingerCanvas(drawing: $drawing, ink: ink, tool: tool, width: brush.width, onTwoFingerTap: undo)
+            ProtoFingerCanvas(drawing: $drawing, ink: ink, tool: tool, width: brush.width)
             if editingID != nil {
                 // Tap anywhere else on the canvas to finish typing.
                 Color.clear.contentShape(Rectangle()).onTapGesture { finishEditing() }
@@ -176,27 +174,6 @@ struct ProtoDrawView: View {
             }
         }
         .clipShape(RoundedRectangle(cornerRadius: 32, style: .continuous))
-        .overlay(alignment: .top) {
-            if showsHint {
-                Text("Pinch to zoom · Tap with two fingers to undo")
-                    .font(.footnote.weight(.semibold))
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
-                    .background(.black.opacity(0.6), in: Capsule())
-                    .padding(.top, 12)
-                    .transition(.opacity.combined(with: .move(edge: .top)))
-                    .allowsHitTesting(false)
-            }
-        }
-        .task {
-            guard !hintShown else { return }
-            hintShown = true
-            try? await Task.sleep(for: .seconds(0.6))
-            withAnimation { showsHint = true }
-            try? await Task.sleep(for: .seconds(4))
-            withAnimation { showsHint = false }
-        }
         .aspectRatio(1, contentMode: .fit)
         .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { canvasSide = $0 }
         .shadow(color: .black.opacity(0.06), radius: 12, y: 4)
@@ -701,13 +678,12 @@ enum ProtoBrush: String, CaseIterable {
     var next: ProtoBrush { [.thin: .medium, .medium: .thick, .thick: .thin][self]! }
 }
 
-/// PencilKit canvas tuned for fingers: even (monoline) strokes, pinch to zoom, two-finger tap to undo.
+/// PencilKit canvas tuned for fingers: even (monoline) strokes, no zoom.
 struct ProtoFingerCanvas: UIViewRepresentable {
     @Binding var drawing: PKDrawing
     var ink: UIColor
     var tool: AppState.CanvasTool
     var width: CGFloat
-    var onTwoFingerTap: () -> Void
 
     func makeUIView(context: Context) -> PKCanvasView {
         let canvas = PKCanvasView()
@@ -717,14 +693,10 @@ struct ProtoFingerCanvas: UIViewRepresentable {
         canvas.isOpaque = false
         canvas.drawingPolicy = .anyInput
         canvas.minimumZoomScale = 1
-        canvas.maximumZoomScale = 3
-        canvas.bouncesZoom = true
+        canvas.maximumZoomScale = 1
         canvas.showsVerticalScrollIndicator = false
         canvas.showsHorizontalScrollIndicator = false
         canvas.tool = makeTool()
-        let tap = UITapGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.twoFingerTap))
-        tap.numberOfTouchesRequired = 2
-        canvas.addGestureRecognizer(tap)
         return canvas
     }
 
@@ -749,11 +721,6 @@ struct ProtoFingerCanvas: UIViewRepresentable {
 
         func canvasViewDrawingDidChange(_ canvasView: PKCanvasView) {
             parent.drawing = canvasView.drawing
-        }
-
-        @objc func twoFingerTap() {
-            UIImpactFeedbackGenerator(style: .light).impactOccurred()
-            parent.onTwoFingerTap()
         }
     }
 }

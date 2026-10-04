@@ -73,12 +73,23 @@ struct ProtoPersonHeader: View {
     let person: ProtoPerson
     var subtitle: String?
     var showsChevron = false
+    /// A small › after the name: tapping the header opens their profile.
+    var showsDisclosure = false
+    var muted = false
 
     var body: some View {
         HStack(spacing: 8) {
             ProtoAvatar(person: person, size: 32)
             VStack(alignment: .leading, spacing: 0) {
-                Text(person.name).font(.headline)
+                HStack(spacing: 3) {
+                    Text(person.name).font(.headline)
+                    if muted {
+                        Image(systemName: "bell.slash.fill").font(.caption2).foregroundStyle(.secondary)
+                    }
+                    if showsDisclosure {
+                        Image(systemName: "chevron.right").font(.caption2.weight(.bold)).foregroundStyle(.tertiary)
+                    }
+                }
                 if let subtitle {
                     Text(subtitle).font(.caption).foregroundStyle(.secondary)
                 }
@@ -123,33 +134,48 @@ struct ProtoNamePill: View {
     }
 }
 
-/// Who reacted, with what. Sits on the bottom-left of a doodle.
+/// The reaction on a doodle, in its own little circle that hangs off the doodle's bottom-left corner.
+/// No avatar: with one person it can only be yours on theirs, or theirs on yours.
 /// A new reaction pops in and plays; the one it replaces shrinks away.
 struct ProtoReactionChip: View {
-    let person: ProtoPerson
     let emoji: String
+    var size: CGFloat = 32
     /// Play when the emoji appears (you just reacted). Off for reactions already there when the page opened.
     var animates = false
 
     var body: some View {
-        HStack(spacing: 5) {
-            ProtoAvatar(person: person, size: 18)
-            ZStack {
-                ProtoNotoEmoji(emoji: emoji, size: 18, autoplay: animates)
-                    .id(emoji)
-                    .transition(.asymmetric(
-                        insertion: .scale(scale: 0.2).combined(with: .opacity),
-                        removal: .scale(scale: 0.2).combined(with: .opacity)
-                    ))
-            }
-            .frame(width: 18, height: 18)
+        ZStack {
+            ProtoNotoEmoji(emoji: emoji, size: size * 0.62, autoplay: animates)
+                .id(emoji)
+                .transition(.asymmetric(
+                    insertion: .scale(scale: 0.2).combined(with: .opacity),
+                    removal: .scale(scale: 0.2).combined(with: .opacity)
+                ))
         }
-        // Same height as the name and time labels.
-        .padding(.leading, 3)
-        .padding(.trailing, 8)
-        .padding(.vertical, 3)
-        .background(.white, in: Capsule())
+        .frame(width: size, height: size)
+        .background(.white, in: Circle())
+        .overlay(Circle().stroke(Color(.systemBackground), lineWidth: 2))
         .shadow(color: .black.opacity(0.12), radius: 4, y: 2)
+    }
+}
+
+/// Page dots; with many pages only seven show, the outer ones smaller.
+struct ProtoPageDots: View {
+    let count: Int
+    let index: Int
+
+    var body: some View {
+        let visible = min(count, 7)
+        let start = max(0, min(index - 3, count - visible))
+        HStack(spacing: 6) {
+            ForEach(start..<(start + visible), id: \.self) { i in
+                let edge = (i == start && start > 0) || (i == start + visible - 1 && start + visible < count)
+                Capsule()
+                    .fill(i == index ? DoodleTheme.pink : Color.primary.opacity(0.2))
+                    .frame(width: i == index ? 18 : (edge ? 5 : 7), height: edge && i != index ? 5 : 7)
+            }
+        }
+        .animation(.snappy, value: index)
     }
 }
 
@@ -158,6 +184,8 @@ struct ProtoDoodleCard: View {
     let them: ProtoPerson
     var cornerRadius: CGFloat = 32
     var animatesReaction = false
+    /// Off where a label already says whose it is ("Sent by you").
+    var showsAuthor = true
 
     var body: some View {
         Image(uiImage: doodle.image)
@@ -169,7 +197,7 @@ struct ProtoDoodleCard: View {
             .overlay(alignment: .bottomTrailing) {
                 // On their page it's clear who theirs are from: just the time. Yours keep your avatar.
                 Group {
-                    if doodle.fromMe {
+                    if doodle.fromMe && showsAuthor {
                         ProtoNamePill(person: them, text: PrototypeStore.timeLabel(doodle.createdAt), sent: true)
                     } else {
                         ProtoPill(text: PrototypeStore.timeLabel(doodle.createdAt))
@@ -177,14 +205,16 @@ struct ProtoDoodleCard: View {
                 }
                 .padding(12)
             }
+            .shadow(color: .black.opacity(0.1), radius: 12, y: 8)
             .overlay(alignment: .bottomLeading) {
+                // Outside the canvas, overlapping its edge by 10pt.
                 if let emoji = doodle.reaction {
-                    ProtoReactionChip(person: doodle.fromMe ? them : PrototypeStore.me, emoji: emoji, animates: animatesReaction)
-                        .padding(12)
+                    ProtoReactionChip(emoji: emoji, animates: animatesReaction)
+                        .padding(.leading, 12)
+                        .offset(y: 22)
                         .transition(.scale.combined(with: .opacity))
                 }
             }
-            .shadow(color: .black.opacity(0.1), radius: 12, y: 8)
     }
 }
 

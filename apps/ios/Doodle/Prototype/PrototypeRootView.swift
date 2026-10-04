@@ -28,6 +28,8 @@ struct ProtoRootView: View {
                 } else if let only = store.people.first {
                     ProtoPersonView(personID: only.id, isHome: true, onDraw: draw)
                         .id(only.id + store.scenario.rawValue)
+                } else {
+                    ProtoNoOneView()
                 }
             }
             .navigationDestination(for: String.self) { id in
@@ -51,6 +53,7 @@ struct ProtoRootView: View {
             path = [focus.personID]
         }
         .onChange(of: store.scenario) { _, _ in path = [] }
+        .onChange(of: store.people.map(\.id)) { _, ids in path.removeAll { !ids.contains($0) } }
     }
 
     private func draw(_ personID: String) {
@@ -161,6 +164,44 @@ struct ProtoProfileSheet: View {
         }
         .presentationDetents([.medium, .large])
         .presentationBackground(Color(.systemGroupedBackground))
+    }
+}
+
+/// Nobody connected (e.g. after removing your only person): home is the invite.
+struct ProtoNoOneView: View {
+    @EnvironmentObject private var store: PrototypeStore
+
+    var body: some View {
+        ScrollView {
+            Button { store.invitePerson() } label: {
+                RoundedRectangle(cornerRadius: 32, style: .continuous)
+                    .fill(Color(.secondarySystemGroupedBackground))
+                    .strokeBorder(Color.secondary.opacity(0.35), style: StrokeStyle(lineWidth: 1.5, dash: [7, 6]))
+                    .aspectRatio(1, contentMode: .fit)
+                    .overlay {
+                        VStack(spacing: 12) {
+                            Image(systemName: "person.badge.plus")
+                                .font(.title2.weight(.semibold))
+                                .foregroundStyle(DoodleTheme.pink)
+                                .frame(width: 56, height: 56)
+                                .background(DoodleTheme.pink.opacity(0.12), in: Circle())
+                            Text("Add someone").font(.headline).foregroundStyle(DoodleTheme.pink)
+                            Text("Send an invite link. Your doodles land on their Home Screen.")
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal, 40)
+                        }
+                    }
+            }
+            .buttonStyle(.plain)
+            .padding(.horizontal, 16)
+        }
+        .background(Color(.systemGroupedBackground))
+        .navigationTitle("Doodle")
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) { ProtoAccountMenu() }
+        }
     }
 }
 
